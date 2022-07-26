@@ -34,14 +34,9 @@ lint: license
 .PHONY: test
 test:
 	@echo "Running all tests ..."
-	@go test -v ../tests
-
-.PHONY: vectors
-vectors:
-	@echo "Testing vectors ..."
-	@go test -v ../tests/vectors_test.go
+	@go test -v ../...
 
 .PHONY: cover
 cover:
 	@echo "Testing with coverage ..."
-	@go test -v -race -covermode=atomic -coverpkg=../... -coverprofile=../coverage.out ../tests
+	@go test -v -race -covermode=atomic -coverpkg=../... -coverprofile=../coverage.out ../...
