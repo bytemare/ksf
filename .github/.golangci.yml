@@ -119,7 +119,7 @@ linters-settings:
   gofmt:
     simplify: true
   goimports:
-    local-prefixes: github.com/bytemare/{{.TEMPLATE}}
+    local-prefixes: github.com/bytemare/ksf
   gomnd:
     settings:
       mnd:

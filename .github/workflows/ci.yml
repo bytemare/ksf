@@ -1,4 +1,4 @@
-name: OPAQUE
+name: KSF
 on:
   pull_request:
     branches:
@@ -49,7 +49,7 @@ jobs:
 
       # Test
       - name: Run Tests
-        run: make test
+        run: (cd .github/ && make test)
 
   analyze:
     name: Analyze
@@ -66,13 +66,13 @@ jobs:
 
       # Coverage
       - name: Run coverage
-        run: make cover
+        run: (cd .github/ && make cover)
 
       # Codecov
       - name: Codecov
         uses: codecov/codecov-action@29386c70ef20e286228c72b668a06fd0e8399192 # pin@v1
         with:
-          file: ./coverage.out
+          file: .github/coverage.out
 
       # Sonar
       - name: SonarCloud Scan
@@ -82,10 +82,8 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
           args: >
-            -Dsonar.projectKey=bytemare_opaque
-            -Dsonar.organization=bytemare-github
-            -Dsonar.go.coverage.reportPaths=coverage.out
-            -Dsonar.sources=.
-            -Dsonar.test.exclusions=examples_test.go,tests/**
-            -Dsonar.tests=tests/
+            -Dsonar.projectKey=bytemare_ksf -Dsonar.organization=bytemare-github
+            -Dsonar.go.coverage.reportPaths=coverage.out -Dsonar.sources=.
             -Dsonar.verbose=true
+          #-Dsonar.tests=ksf_test.go
+          #-Dsonar.test.exclusions=examples_test.go,tests/**

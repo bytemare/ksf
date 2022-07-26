@@ -3,7 +3,8 @@ GH_ACTIONS = workflows
 .PHONY: update
 update:
 	@echo "Updating dependencies..."
-	@go get -u
+	@$(shell cd ../ go get -u ../...)
+	@pwd
 	@go mod tidy
 	@echo "Updating Github Actions pins..."
 	@$(foreach file, $(wildcard $(GH_ACTIONS)/*.yml), pin-github-action $(file);)
@@ -18,29 +19,24 @@ fmt:
 	@go fmt ./...
 	@golines -m 120 -t 4 -w .
 	@gofumpt -w -extra .
-	@gci write --Section Standard --Section Default --Section "Prefix($(shell go list -m))" .
+	@gci write --Section Standard --Section Default --Section "Prefix($(shell go list -m))" ../
 
 .PHONY: license
 license:
 	@echo "Checking License headers ..."
-	@if addlicense -check -v -f .github/licence-header.tmpl *; then echo "License headers OK"; else return 1; fi;
+	@if addlicense -check -v -f licence-header.tmpl ../*; then echo "License headers OK"; else return 1; fi;
 
 .PHONY: lint
 lint: license
 	@echo "Linting ..."
-	@if golangci-lint run --config=./.github/.golangci.yml ../...; then echo "Linting OK"; else return 1; fi;
+	@if golangci-lint run --config=.golangci.yml ../...; then echo "Linting OK"; else return 1; fi;
 
 .PHONY: test
 test:
 	@echo "Running all tests ..."
-	@go test -v ../tests
-
-.PHONY: vectors
-vectors:
-	@echo "Testing vectors ..."
-	@go test -v ../tests/vectors_test.go
+	@go test -v ../...
 
 .PHONY: cover
 cover:
 	@echo "Testing with coverage ..."
-	@go test -v -race -covermode=atomic -coverpkg=../... -coverprofile=../coverage.out ../tests
+	@go test -v -race -covermode=atomic -coverpkg=../... -coverprofile=../coverage.out ../...
