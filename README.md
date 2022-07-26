@@ -17,8 +17,6 @@ Supported Key Stretching Functions (or Key Derivation Functions are):
 - Scrypt
 - PBKDF2
 
-This package is continuously fuzzed on FizzBuzz.
-
 #### What is ksf?
 
 > In cryptography, key stretching techniques are used to make a possibly weak key, typically a password or passphrase,
