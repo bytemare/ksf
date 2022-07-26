@@ -49,7 +49,7 @@ jobs:
 
       # Test
       - name: Run Tests
-        run: make test
+        run: (cd .github/ && make test)
 
   analyze:
     name: Analyze
@@ -66,13 +66,13 @@ jobs:
 
       # Coverage
       - name: Run coverage
-        run: make cover
+        run: (cd .github/ && make cover)
 
       # Codecov
       - name: Codecov
         uses: codecov/codecov-action@29386c70ef20e286228c72b668a06fd0e8399192 # pin@v1
         with:
-          file: ./coverage.out
+          file: .github/coverage.out
 
       # Sonar
       - name: SonarCloud Scan
