@@ -84,5 +84,6 @@ jobs:
           args: >
             -Dsonar.projectKey=bytemare_ksf -Dsonar.organization=bytemare-github
             -Dsonar.go.coverage.reportPaths=coverage.out -Dsonar.sources=.
-            -Dsonar.tests=ksf_test.go -Dsonar.verbose=true
+            -Dsonar.verbose=true
+          #-Dsonar.tests=ksf_test.go
           #-Dsonar.test.exclusions=examples_test.go,tests/**
