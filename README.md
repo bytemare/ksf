@@ -1,32 +1,39 @@
-# {{.TEMPLATE}}
-[![{{.TEMPLATE}}](https://github.com/bytemare/{{.TEMPLATE}}/actions/workflows/ci.yml/badge.svg)](https://github.com/bytemare/{{.TEMPLATE}}/actions/workflows/ci.yml)
-[![Go Reference](https://pkg.go.dev/badge/github.com/bytemare/{{.TEMPLATE}}.svg)](https://pkg.go.dev/github.com/bytemare/{{.TEMPLATE}})
-[![codecov](https://codecov.io/gh/bytemare/{{.TEMPLATE}}/branch/main/graph/badge.svg?token=5bQfB0OctA)](https://codecov.io/gh/bytemare/{{.TEMPLATE}})
+# Cryptographic Key Stretching Functions
+[![ksf](https://github.com/bytemare/ksf/actions/workflows/ci.yml/badge.svg)](https://github.com/bytemare/ksf/actions/workflows/ci.yml)
+[![Go Reference](https://pkg.go.dev/badge/github.com/bytemare/ksf.svg)](https://pkg.go.dev/github.com/bytemare/ksf)
+[![codecov](https://codecov.io/gh/bytemare/ksf/branch/main/graph/badge.svg?token=5bQfB0OctA)](https://codecov.io/gh/bytemare/ksf)
 
 ```
-  import "github.com/bytemare/{{.TEMPLATE}}"
+  import "github.com/bytemare/ksf"
 ```
 
-This package implements [{{.TEMPLATE}}](https://datatracker.ietf.org/doc/draft-irtf-cfrg-{{.TEMPLATE}}).
+This package exposes a simple API to seamlessly use a variety of key stretching functions, also used as key derivation
+functions. It aims at minimum code adaptation in your code, and easy parameterization.
+It completely relies on built-ins, so there's no change in implementations.
 
-{{Short description}}
+Supported Key Stretching Functions (or Key Derivation Functions are):
+- Argon2 family
+- bcrypt
+- Scrypt
+- PBKDF2
 
-This package is continuously fuzzed on Fuzzbuzz.
+This package is continuously fuzzed on FizzBuzz.
 
-#### What is {{.TEMPLATE}}?
+#### What is ksf?
 
-> {{Short Philosophy about the concept we're implementing.}}
+> In cryptography, key stretching techniques are used to make a possibly weak key, typically a password or passphrase,
+> more secure against a brute-force attack by increasing the resources (time and possibly space) it takes to test each
+> possible key.
+> 
+> [Wikipedia](https://en.wikipedia.org/wiki/Key_stretching)
 
-#### References
-- {{If you have any, put links that can help know more.}}
+## Documentation [![Go Reference](https://pkg.go.dev/badge/github.com/bytemare/ksf.svg)](https://pkg.go.dev/github.com/bytemare/ksf)
 
-## Documentation [![Go Reference](https://pkg.go.dev/badge/github.com/bytemare/{{.TEMPLATE}}.svg)](https://pkg.go.dev/github.com/bytemare/{{.TEMPLATE}})
-
-You can find the documentation and usage examples in [the package doc](https://pkg.go.dev/github.com/bytemare/{{.TEMPLATE}}) and [the project wiki](https://github.com/bytemare/{{.TEMPLATE}}/wiki) .
+You can find the documentation and usage examples in [the package doc](https://pkg.go.dev/github.com/bytemare/ksf) and [the project wiki](https://github.com/bytemare/ksf/wiki) .
 
 ## Versioning
 
-[SemVer](http://semver.org) is used for versioning. For the versions available, see the [tags on the repository](https://github.com/bytemare/{{.TEMPLATE}}/tags).
+[SemVer](http://semver.org) is used for versioning. For the versions available, see the [tags on the repository](https://github.com/bytemare/ksf/tags).
 
 
 ## Contributing

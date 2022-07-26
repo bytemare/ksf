@@ -1,4 +1,4 @@
-name: OPAQUE
+name: KSF
 on:
   pull_request:
     branches:
@@ -82,10 +82,7 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
           args: >
-            -Dsonar.projectKey=bytemare_opaque
-            -Dsonar.organization=bytemare-github
-            -Dsonar.go.coverage.reportPaths=coverage.out
-            -Dsonar.sources=.
+            -Dsonar.projectKey=bytemare_ksf -Dsonar.organization=bytemare-github
+            -Dsonar.go.coverage.reportPaths=coverage.out -Dsonar.sources=.
             -Dsonar.test.exclusions=examples_test.go,tests/**
-            -Dsonar.tests=tests/
-            -Dsonar.verbose=true
+            -Dsonar.tests=tests/ -Dsonar.verbose=true
