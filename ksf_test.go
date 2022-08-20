@@ -14,7 +14,7 @@ import (
 	"math"
 	"testing"
 
-	"ksf"
+	"github.com/bytemare/ksf"
 )
 
 var (
