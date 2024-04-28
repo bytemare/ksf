@@ -18,7 +18,7 @@ jobs:
 
     steps:
       - name: Checkout repo
-        uses: actions/checkout@7884fcad6b5d53d10323aee724dc68d8b9096a2e # pin@v2
+        uses: actions/checkout@8459bc0c7e3759cdf591f513d9f141a95fef0a8f # pin@v2
         with:
           fetch-depth: 0
       - name: Setup Go-${{ matrix.GOVER }}
@@ -39,7 +39,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
-        uses: actions/checkout@7884fcad6b5d53d10323aee724dc68d8b9096a2e # pin@v2
+        uses: actions/checkout@8459bc0c7e3759cdf591f513d9f141a95fef0a8f # pin@v2
         with:
           fetch-depth: 0
       - name: Setup Go
@@ -56,7 +56,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
-        uses: actions/checkout@7884fcad6b5d53d10323aee724dc68d8b9096a2e # pin@v2
+        uses: actions/checkout@8459bc0c7e3759cdf591f513d9f141a95fef0a8f # pin@v2
         with:
           fetch-depth: 0
       - name: Setup Go
