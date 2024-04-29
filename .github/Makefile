@@ -1,42 +1,45 @@
-GH_ACTIONS = workflows
-
 .PHONY: update
 update:
 	@echo "Updating dependencies..."
-	@$(shell cd ../ go get -u ../...)
+	@cd ../ && go get -u
 	@pwd
 	@go mod tidy
-	@echo "Updating Github Actions pins..."
-	@$(foreach file, $(wildcard $(GH_ACTIONS)/*.yml), pin-github-action $(file);)
+
+.PHONY: update-linters
+update-linters:
 	@echo "Updating linters..."
-	@go get -u mvdan.cc/gofumpt@latest github.com/daixiang0/gci github.com/segmentio/golines@latest
+	@go install mvdan.cc/gofumpt@latest
+	@go install github.com/daixiang0/gci@latest
+	@go install github.com/segmentio/golines@latest
+	@go install golang.org/x/tools/go/analysis/passes/fieldalignment/cmd/fieldalignment@latest
 	@curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin
 
 .PHONY: fmt
 fmt:
 	@echo "Formatting ..."
 	@go mod tidy
-	@go fmt ./...
-	@golines -m 120 -t 4 -w .
-	@gofumpt -w -extra .
-	@gci write --Section Standard --Section Default --Section "Prefix($(shell go list -m))" ../
+	@go fmt ../...
+	@golines -m 120 -t 4 -w ../
+	@gofumpt -w -extra ../
+	@gci write -s Standard -s Default -s "Prefix($(shell go list -m))" ../
+	@fieldalignment -fix ../...
 
 .PHONY: license
 license:
 	@echo "Checking License headers ..."
-	@if addlicense -check -v -f licence-header.tmpl ../*; then echo "License headers OK"; else return 1; fi;
+	@if addlicense -check -v -skip yaml -f licence-header.tmpl ../*; then echo "License headers OK"; else return 1; fi;
 
 .PHONY: lint
-lint: license
+lint: fmt license
 	@echo "Linting ..."
 	@if golangci-lint run --config=.golangci.yml ../...; then echo "Linting OK"; else return 1; fi;
 
 .PHONY: test
 test:
 	@echo "Running all tests ..."
-	@go test -v ../...
+	@go test -v -vet=all ../...
 
 .PHONY: cover
 cover:
 	@echo "Testing with coverage ..."
-	@go test -v -race -covermode=atomic -coverpkg=../... -coverprofile=../coverage.out ../...
+	@go test -v -race -covermode=atomic -coverpkg=../... -coverprofile=./coverage.out ../...
