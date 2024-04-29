@@ -11,24 +11,19 @@ jobs:
   lint:
     name: Lint
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        GOVER: [ '1.18' ]
-
     steps:
       - name: Checkout repo
-        uses: actions/checkout@7884fcad6b5d53d10323aee724dc68d8b9096a2e # pin@v2
+        uses: actions/checkout@7884fcad6b5d53d10323aee724dc68d8b9096a2e
         with:
           fetch-depth: 0
-      - name: Setup Go-${{ matrix.GOVER }}
-        uses: actions/setup-go@bfdd3570ce990073878bf10f6b2d79082de49492 # pin@v2
+      - name: Setup Go
+        uses: actions/setup-go@bfdd3570ce990073878bf10f6b2d79082de49492
         with:
-          go-version: ${{ matrix.GOVER }}
+          go-version-file: ./go.mod
 
       # Linting
       - name: Linting
-        uses: golangci/golangci-lint-action@5c56cd6c9dc07901af25baab6f2b0d9f3b7c3018 # pin@v2
+        uses: golangci/golangci-lint-action@5c56cd6c9dc07901af25baab6f2b0d9f3b7c3018
         with:
           version: latest
           args: --config=./.github/.golangci.yml ./...
@@ -37,15 +32,19 @@ jobs:
   test:
     name: Test
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        go: [ '1.22', '1.21' ]
     steps:
       - name: Checkout repo
-        uses: actions/checkout@7884fcad6b5d53d10323aee724dc68d8b9096a2e # pin@v2
+        uses: actions/checkout@7884fcad6b5d53d10323aee724dc68d8b9096a2e
         with:
           fetch-depth: 0
       - name: Setup Go
-        uses: actions/setup-go@bfdd3570ce990073878bf10f6b2d79082de49492 # pin@v2
+        uses: actions/setup-go@bfdd3570ce990073878bf10f6b2d79082de49492
         with:
-          go-version: '1.18'
+          go-version: ${{ matrix.go }}
 
       # Test
       - name: Run Tests
@@ -56,13 +55,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
-        uses: actions/checkout@7884fcad6b5d53d10323aee724dc68d8b9096a2e # pin@v2
+        uses: actions/checkout@7884fcad6b5d53d10323aee724dc68d8b9096a2e
         with:
           fetch-depth: 0
       - name: Setup Go
-        uses: actions/setup-go@bfdd3570ce990073878bf10f6b2d79082de49492 # pin@v2
+        uses: actions/setup-go@bfdd3570ce990073878bf10f6b2d79082de49492
         with:
-          go-version: '1.18'
+          go-version-file: ./go.mod
 
       # Coverage
       - name: Run coverage
@@ -70,20 +69,23 @@ jobs:
 
       # Codecov
       - name: Codecov
-        uses: codecov/codecov-action@29386c70ef20e286228c72b668a06fd0e8399192 # pin@v1
+        uses: codecov/codecov-action@29386c70ef20e286228c72b668a06fd0e8399192
         with:
           file: .github/coverage.out
 
       # Sonar
       - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@6bbd64e0cb2194e04addb429d669a9ee873eeeef # pin@master
+        uses: SonarSource/sonarcloud-github-action@6bbd64e0cb2194e04addb429d669a9ee873eeeef
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
           args: >
-            -Dsonar.projectKey=bytemare_ksf -Dsonar.organization=bytemare-github
-            -Dsonar.go.coverage.reportPaths=coverage.out -Dsonar.sources=.
+            -Dsonar.projectKey=bytemare_ksf
+            -Dsonar.organization=bytemare-github
+            -Dsonar.go.coverage.reportPaths=coverage.out
+            -Dsonar.sources=.
             -Dsonar.verbose=true
-          #-Dsonar.tests=ksf_test.go
-          #-Dsonar.test.exclusions=examples_test.go,tests/**
+            -Dsonar.test.exclusions=tests/**
+            -Dsonar.coverage.exclusions=tests/**
+            -Dsonar.tests=tests/
