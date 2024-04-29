@@ -1,6 +1,9 @@
 name: "CodeQL"
 
 on:
+  push:
+    branches:
+      - main
   pull_request:
     branches:
       - main
@@ -23,17 +26,28 @@ jobs:
       fail-fast: false
 
     steps:
+      - uses: step-security/harden-runner@6c3b1c91e8873ae0c705b0709f957c7a6a5eaf10
+        with:
+          disable-sudo: true
+          egress-policy: block
+          allowed-endpoints: >
+            api.github.com:443
+            github.com:443
+            proxy.golang.org:443
+            storage.googleapis.com:443
+            sum.golang.org:443
+
       - name: Checkout repository
-        uses: actions/checkout@7884fcad6b5d53d10323aee724dc68d8b9096a2e # pin@v2
+        uses: actions/checkout@37b082107ba410260a3aaddf93122e04801ce631
 
       # Initializes the CodeQL tools for scanning.
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@f7b6c0021b777684992d895a563fc3a0e425783a # pin@v1
+        uses: github/codeql-action/init@dbf2b1706b768069fb1bb2dd2d8552be7a9e2a51
         with:
           languages: go
 
       - name: Autobuild
-        uses: github/codeql-action/autobuild@f7b6c0021b777684992d895a563fc3a0e425783a # pin@v1
+        uses: github/codeql-action/autobuild@dbf2b1706b768069fb1bb2dd2d8552be7a9e2a51
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@f7b6c0021b777684992d895a563fc3a0e425783a # pin@v1
+        uses: github/codeql-action/analyze@dbf2b1706b768069fb1bb2dd2d8552be7a9e2a51
