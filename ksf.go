@@ -30,9 +30,6 @@ const (
 	// PBKDF2Sha512 PBKDF2 password kdf function using SHA-512.
 	PBKDF2Sha512
 
-	// Bcrypt password kdf function.
-	Bcrypt
-
 	maxID
 )
 
@@ -72,7 +69,6 @@ func init() {
 	Argon2id.register(argon2idNew)
 	Scrypt.register(scryptKSFNew)
 	PBKDF2Sha512.register(pbkdf2New)
-	Bcrypt.register(bcryptNew)
 }
 
 type keyStretchingFunction interface {

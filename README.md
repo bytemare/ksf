@@ -13,7 +13,6 @@ It completely relies on built-ins, so there's no change in implementations.
 
 Supported Key Stretching Functions (or Key Derivation Functions are):
 - Argon2 family
-- bcrypt
 - Scrypt
 - PBKDF2
 
