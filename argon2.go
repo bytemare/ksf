@@ -9,6 +9,7 @@
 package ksf
 
 import (
+	"errors"
 	"fmt"
 
 	"golang.org/x/crypto/argon2"
@@ -18,6 +19,8 @@ const (
 	argon2ids      = "Argon2id"
 	argon2idFormat = "%s(%d-%d-%d)"
 )
+
+var errArgon2idThreads = errors.New("number of threads cannot be above 255")
 
 type argon2KSF struct {
 	time, memory uint32
@@ -49,7 +52,7 @@ func (a *argon2KSF) Parameterize(parameters ...int) {
 	}
 
 	if parameters[2] > 255 {
-		panic("number of threads cannot be above 255")
+		panic(errArgon2idThreads)
 	}
 
 	a.time = uint32(parameters[0])

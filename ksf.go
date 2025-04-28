@@ -44,10 +44,6 @@ func (i Identifier) Available() bool {
 
 // Get returns a KSF with default parameters.
 func (i Identifier) Get() *KSF {
-	if !i.Available() {
-		return nil
-	}
-
 	var ksf keyStretchingFunction
 
 	switch i {
