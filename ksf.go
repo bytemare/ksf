@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 //
-// Copyright (C) 2020 Daniel Bourdrez. All Rights Reserved.
+// Copyright (C) 2020-2025 Daniel Bourdrez. All Rights Reserved.
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the root directory of this source tree or at
@@ -10,9 +10,10 @@
 package ksf
 
 import (
-	cryptorand "crypto/rand"
 	"errors"
 	"fmt"
+
+	cryptorand "crypto/rand"
 )
 
 var errParams = errors.New("invalid amount of parameters")
@@ -40,11 +41,20 @@ func (i Identifier) Available() bool {
 
 // Get returns a KSF with default parameters.
 func (i Identifier) Get() *KSF {
-	if !i.Available() {
+	var ksf keyStretchingFunction
+
+	switch i {
+	case Argon2id:
+		ksf = argon2idNew()
+	case Scrypt:
+		ksf = scryptKSFNew()
+	case PBKDF2Sha512:
+		ksf = pbkdf2New()
+	default:
 		return nil
 	}
 
-	return &KSF{constructors[i-1]()}
+	return &KSF{ksf}
 }
 
 // Harden uses default parameters for the key derivation function over the input password and salt.
@@ -55,20 +65,6 @@ func (i Identifier) Harden(password, salt []byte, length int) []byte {
 // String returns the string name of the hashing function.
 func (i Identifier) String() string {
 	return i.Get().String()
-}
-
-type constructor func() keyStretchingFunction
-
-var constructors [maxID - 1]constructor
-
-func (i Identifier) register(c constructor) {
-	constructors[i-1] = c
-}
-
-func init() {
-	Argon2id.register(argon2idNew)
-	Scrypt.register(scryptKSFNew)
-	PBKDF2Sha512.register(pbkdf2New)
 }
 
 type keyStretchingFunction interface {

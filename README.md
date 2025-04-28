@@ -1,5 +1,5 @@
 # Cryptographic Key Stretching Functions
-[![ksf](https://github.com/bytemare/ksf/actions/workflows/ci.yml/badge.svg)](https://github.com/bytemare/ksf/actions/workflows/ci.yml)
+[![ksf](https://github.com/bytemare/ksf/actions/workflows/wf-analysis.yaml/badge.svg)](https://github.com/bytemare/ksf/actions/workflows/wf-analysis.yaml)
 [![Go Reference](https://pkg.go.dev/badge/github.com/bytemare/ksf.svg)](https://pkg.go.dev/github.com/bytemare/ksf)
 [![codecov](https://codecov.io/gh/bytemare/ksf/branch/main/graph/badge.svg?token=5bQfB0OctA)](https://codecov.io/gh/bytemare/ksf)
 

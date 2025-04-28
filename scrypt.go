@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 //
-// Copyright (C) 2020 Daniel Bourdrez. All Rights Reserved.
+// Copyright (C) 2020-2025 Daniel Bourdrez. All Rights Reserved.
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the root directory of this source tree or at
@@ -19,17 +19,17 @@ const (
 	scryptFormat = "%s(%d-%d-%d)"
 )
 
-var (
-	defaultScryptn = 32768
-	defaultScryptr = 8
-	defaultScryptp = 1
-)
-
 type scryptKSF struct {
 	n, r, p int
 }
 
-func scryptKSFNew() keyStretchingFunction {
+func scryptKSFNew() *scryptKSF {
+	var (
+		defaultScryptn = 32768
+		defaultScryptr = 8
+		defaultScryptp = 1
+	)
+
 	return &scryptKSF{
 		n: defaultScryptn,
 		r: defaultScryptr,
