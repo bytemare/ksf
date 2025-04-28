@@ -6,7 +6,7 @@
 // LICENSE file in the root directory of this source tree or at
 // https://spdx.org/licenses/MIT.html
 
-package tests_test
+package ksf_test
 
 import (
 	"errors"
@@ -69,8 +69,8 @@ func expectPanic(expectedError error, f func()) (bool, error) {
 }
 
 var (
-	ksfs    = []ksf.Identifier{ksf.Argon2id, ksf.Bcrypt, ksf.PBKDF2Sha512, ksf.Scrypt}
-	strings = []string{"Argon2id(3-65536-4)", "Scrypt(32768-8-1)", "PBKDF2(10000-SHA512)", "Bcrypt(10)"}
+	ksfs    = []ksf.Identifier{ksf.Argon2id, ksf.PBKDF2Sha512, ksf.Scrypt}
+	strings = []string{"Argon2id(3-65536-4)", "PBKDF2(10000-SHA512)", "Scrypt(32768-8-1)"}
 )
 
 func TestAvailability(t *testing.T) {
@@ -91,18 +91,20 @@ func TestKSF(t *testing.T) {
 	salt := ksf.Salt(32)
 	length := 32
 
-	for _, m := range ksfs {
+	for i, m := range ksfs {
 		t.Run(m.String(), func(t *testing.T) {
 			if !m.Available() {
 				t.Fatal("expected assertion to be true")
 			}
 
-			if m.String() != strings[m-1] {
-				t.Fatal("not equal")
+			if m.String() != strings[i] {
+				t.Fatalf("not equal, %s / %s", m.String(), strings[i])
 			}
 
+			var h1, h2 []byte
+
 			if hasPanic, _ := expectPanic(nil, func() {
-				_ = m.Harden(password, salt, length)
+				h1 = m.Harden(password, salt, length)
 			}); hasPanic {
 				t.Fatal("unexpected panic")
 			}
@@ -110,9 +112,13 @@ func TestKSF(t *testing.T) {
 			h := m.Get()
 			h.Parameterize(h.Params()...)
 			if hasPanic, _ := expectPanic(nil, func() {
-				_ = m.Harden(password, salt, length)
+				h2 = m.Harden(password, salt, length)
 			}); hasPanic {
 				t.Fatal("unexpected panic")
+			}
+
+			if string(h1) != string(h2) {
+				t.Fatalf("not equal, %s / %s", string(h1), string(h2))
 			}
 		})
 	}
@@ -143,27 +149,6 @@ func TestCrashScrypt(t *testing.T) {
 	h.Parameterize(32768, math.MaxInt32, math.MaxInt32)
 	if hasPanic, _ := expectPanic(nil, func() {
 		_ = h.Harden(password, salt, outputLength)
-	}); !hasPanic {
-		t.Fatal("expected panic did not occur")
-	}
-}
-
-func TestCrashBcrypt(t *testing.T) {
-	h := ksf.Bcrypt.Get()
-
-	_ = h.Harden(nil, nil, 0)
-
-	// Wrong number of parameters
-	if hasPanic, _ := expectPanic(errParams, func() {
-		h.Parameterize(1, 2)
-	}); !hasPanic {
-		t.Fatal("expected panic did not occur")
-	}
-
-	// high cost
-	h.Parameterize(32)
-	if hasPanic, _ := expectPanic(nil, func() {
-		_ = h.Harden([]byte("password"), nil, 0)
 	}); !hasPanic {
 		t.Fatal("expected panic did not occur")
 	}

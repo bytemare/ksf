@@ -31,9 +31,6 @@ const (
 	// PBKDF2Sha512 PBKDF2 password kdf function using SHA-512.
 	PBKDF2Sha512
 
-	// Bcrypt password kdf function.
-	Bcrypt
-
 	maxID
 )
 
@@ -49,8 +46,6 @@ func (i Identifier) Get() *KSF {
 	switch i {
 	case Argon2id:
 		ksf = argon2idNew()
-	case Bcrypt:
-		ksf = bcryptNew()
 	case Scrypt:
 		ksf = scryptKSFNew()
 	case PBKDF2Sha512:
