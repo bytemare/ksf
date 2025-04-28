@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 //
-// Copyright (C) 2020 Daniel Bourdrez. All Rights Reserved.
+// Copyright (C) 2020-2025 Daniel Bourdrez. All Rights Reserved.
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the root directory of this source tree or at
@@ -18,8 +18,10 @@ import (
 )
 
 var (
-	errNoPanic        = errors.New("no panic")
-	errNoPanicMessage = errors.New("panic but no message")
+	errNoPanic         = errors.New("no panic")
+	errNoPanicMessage  = errors.New("panic but no message")
+	errParams          = errors.New("invalid amount of parameters")
+	errArgon2idThreads = errors.New("number of threads cannot be above 255")
 )
 
 func hasPanic(f func()) (has bool, err error) {
@@ -123,7 +125,7 @@ func TestCrashScrypt(t *testing.T) {
 	outputLength := 32
 
 	// Wrong number of parameters
-	if hasPanic, _ := expectPanic(nil, func() {
+	if hasPanic, _ := expectPanic(errParams, func() {
 		h.Parameterize(1, 2, 3, 4)
 	}); !hasPanic {
 		t.Fatal("expected panic did not occur")
@@ -152,7 +154,7 @@ func TestCrashBcrypt(t *testing.T) {
 	_ = h.Harden(nil, nil, 0)
 
 	// Wrong number of parameters
-	if hasPanic, _ := expectPanic(nil, func() {
+	if hasPanic, _ := expectPanic(errParams, func() {
 		h.Parameterize(1, 2)
 	}); !hasPanic {
 		t.Fatal("expected panic did not occur")
@@ -169,8 +171,15 @@ func TestCrashBcrypt(t *testing.T) {
 
 func TestCrashArgon2(t *testing.T) {
 	// Wrong number of parameters
-	if hasPanic, _ := expectPanic(nil, func() {
+	if hasPanic, _ := expectPanic(errParams, func() {
 		ksf.Argon2id.Get().Parameterize(1, 2, 3, 4)
+	}); !hasPanic {
+		t.Fatal("expected panic did not occur")
+	}
+
+	// Too many threads
+	if hasPanic, _ := expectPanic(errArgon2idThreads, func() {
+		ksf.Argon2id.Get().Parameterize(1, 2, 256)
 	}); !hasPanic {
 		t.Fatal("expected panic did not occur")
 	}
@@ -178,7 +187,7 @@ func TestCrashArgon2(t *testing.T) {
 
 func TestCrashPBKDF2(t *testing.T) {
 	// Wrong number of parameters
-	if hasPanic, _ := expectPanic(nil, func() {
+	if hasPanic, _ := expectPanic(errParams, func() {
 		ksf.PBKDF2Sha512.Get().Parameterize(1, 2)
 	}); !hasPanic {
 		t.Fatal("expected panic did not occur")
