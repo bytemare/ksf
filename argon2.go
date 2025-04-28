@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 //
-// Copyright (C) 2020 Daniel Bourdrez. All Rights Reserved.
+// Copyright (C) 2020-2025 Daniel Bourdrez. All Rights Reserved.
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the root directory of this source tree or at
@@ -19,17 +19,18 @@ const (
 	argon2idFormat = "%s(%d-%d-%d)"
 )
 
-var (
-	defaultArgon2idTime    = 3
-	defaultArgon2idMemory  = 64 * 1024
-	defaultArgon2idThreads = 4
-)
-
 type argon2KSF struct {
-	time, memory, threads int
+	time, memory uint32
+	threads      uint8
 }
 
-func argon2idNew() keyStretchingFunction {
+func argon2idNew() *argon2KSF {
+	var (
+		defaultArgon2idTime    = uint32(3)
+		defaultArgon2idMemory  = uint32(64 * 1024)
+		defaultArgon2idThreads = uint8(4)
+	)
+
 	return &argon2KSF{
 		time:    defaultArgon2idTime,
 		memory:  defaultArgon2idMemory,
@@ -38,7 +39,7 @@ func argon2idNew() keyStretchingFunction {
 }
 
 func (a *argon2KSF) Harden(password, salt []byte, length int) []byte {
-	return argon2.IDKey(password, salt, uint32(a.time), uint32(a.memory), uint8(a.threads), uint32(length))
+	return argon2.IDKey(password, salt, a.time, a.memory, a.threads, uint32(length))
 }
 
 // Parameterize replaces the functions parameters with the new ones. Must match the amount of parameters.
@@ -47,9 +48,13 @@ func (a *argon2KSF) Parameterize(parameters ...int) {
 		panic(errParams)
 	}
 
-	a.time = parameters[0]
-	a.memory = parameters[1]
-	a.threads = parameters[2]
+	if parameters[2] > 255 {
+		panic("number of threads cannot be above 255")
+	}
+
+	a.time = uint32(parameters[0])
+	a.memory = uint32(parameters[1])
+	a.threads = uint8(parameters[2])
 }
 
 func (a *argon2KSF) String() string {
@@ -57,5 +62,5 @@ func (a *argon2KSF) String() string {
 }
 
 func (a *argon2KSF) Params() []int {
-	return []int{a.time, a.memory, a.threads}
+	return []int{int(a.time), int(a.memory), int(a.threads)}
 }

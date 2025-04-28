@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 //
-// Copyright (C) 2020 Daniel Bourdrez. All Rights Reserved.
+// Copyright (C) 2020-2025 Daniel Bourdrez. All Rights Reserved.
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the root directory of this source tree or at
@@ -21,20 +21,18 @@ const (
 	pbkdf2Format            = "%s(%d-SHA512)"
 )
 
-var defaultPBKDF2Hash = sha512.New
-
 type pbkdf2KSF struct {
 	iterations int
 }
 
-func pbkdf2New() keyStretchingFunction {
+func pbkdf2New() *pbkdf2KSF {
 	return &pbkdf2KSF{
 		iterations: defaultPBKDF2iterations,
 	}
 }
 
 func (p *pbkdf2KSF) Harden(password, salt []byte, length int) []byte {
-	return pbkdf2.Key(password, salt, p.iterations, length, defaultPBKDF2Hash)
+	return pbkdf2.Key(password, salt, p.iterations, length, sha512.New)
 }
 
 // Parameterize replaces the functions parameters with the new ones. Must match the amount of parameters.
