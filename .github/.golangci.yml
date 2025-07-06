@@ -3,6 +3,7 @@ linters:
   default: all
   disable:
     - varnamelen
+    - noinlineerr
   settings:
     depguard:
       rules:
@@ -42,6 +43,8 @@ linters:
       ignored-numbers:
         - '3'
         - '4'
+        - '8'
+        - '16'
         - '64'
         - '255'
         - '1024'
