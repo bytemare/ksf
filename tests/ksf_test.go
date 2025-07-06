@@ -12,6 +12,7 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"slices"
 	"testing"
 
 	"github.com/bytemare/ksf"
@@ -70,23 +71,27 @@ func expectPanic(expectedError error, f func()) (bool, error) {
 
 type ksfProperties struct {
 	string
+	parameters []int
 	saltLength int
-	Identifier ksf.Identifier
+	identifier ksf.Identifier
 }
 
 var ksfs = []ksfProperties{
 	{
-		Identifier: ksf.Argon2id,
+		identifier: ksf.Argon2id,
+		parameters: []int{3, 65536, 4},
 		string:     "Argon2id(3-65536-4)",
 		saltLength: 16,
 	},
 	{
-		Identifier: ksf.PBKDF2Sha512,
+		identifier: ksf.PBKDF2Sha512,
+		parameters: []int{10000},
 		string:     "PBKDF2(10000-SHA512)",
 		saltLength: 8,
 	},
 	{
-		Identifier: ksf.Scrypt,
+		identifier: ksf.Scrypt,
+		parameters: []int{32768, 8, 1},
 		string:     "Scrypt(32768-8-1)",
 		saltLength: 16,
 	},
@@ -94,8 +99,8 @@ var ksfs = []ksfProperties{
 
 func TestAvailability(t *testing.T) {
 	for _, i := range ksfs {
-		if !i.Identifier.Available() {
-			t.Errorf("%s is not available, but should be", i.Identifier)
+		if !i.identifier.Available() {
+			t.Errorf("%s is not available, but should be", i.identifier)
 		}
 	}
 
@@ -111,27 +116,31 @@ func TestKSF(t *testing.T) {
 	length := 32
 
 	for _, m := range ksfs {
-		t.Run(m.Identifier.String(), func(t *testing.T) {
-			if !m.Identifier.Available() {
+		t.Run(m.identifier.String(), func(t *testing.T) {
+			if !m.identifier.Available() {
 				t.Fatal("expected KSF to be available, but it is not")
 			}
 
-			if m.Identifier.String() != m.string {
-				t.Fatalf("not equal, %s / %s", m.Identifier.String(), m.string)
+			if m.identifier.String() != m.string {
+				t.Fatalf("not equal, %s / %s", m.identifier.String(), m.string)
 			}
 
 			var h1, h2 []byte
 
 			if hasPanic, _ := expectPanic(nil, func() {
-				h1 = m.Identifier.Harden(password, salt, length)
+				h1 = m.identifier.Harden(password, salt, length)
 			}); hasPanic {
 				t.Fatal("unexpected panic")
 			}
 
-			h := m.Identifier.Get()
+			h := m.identifier.Get()
 
-			if h.Identifier() != m.Identifier {
-				t.Fatalf("not equal, %s / %s", h.Identifier(), m.Identifier)
+			if h.Identifier() != m.identifier {
+				t.Fatalf("not equal, %s / %s", h.Identifier(), m.identifier)
+			}
+
+			if !slices.Equal(h.Parameters(), m.parameters) {
+				t.Fatalf("not equal, %v / %v", h.Parameters(), m.parameters)
 			}
 
 			h.Parameterize(h.Parameters()...)
