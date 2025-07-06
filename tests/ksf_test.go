@@ -139,6 +139,10 @@ func TestKSF(t *testing.T) {
 				t.Fatalf("not equal, %s / %s", h.Identifier(), m.identifier)
 			}
 
+			if h.RecommendedSaltLength() != m.saltLength {
+				t.Fatalf("not equal, %d / %d", h.RecommendedSaltLength(), m.saltLength)
+			}
+
 			if !slices.Equal(h.Parameters(), m.parameters) {
 				t.Fatalf("not equal, %v / %v", h.Parameters(), m.parameters)
 			}
