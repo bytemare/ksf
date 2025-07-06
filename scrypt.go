@@ -37,6 +37,12 @@ func scryptKSFNew() *scryptKSF {
 	}
 }
 
+// Identifier returns the KSF identifier.
+func (s *scryptKSF) Identifier() Identifier {
+	return Scrypt
+}
+
+// Harden uses the scrypt key stretching function to derive a key from the password and salt.
 func (s *scryptKSF) Harden(password, salt []byte, length int) []byte {
 	k, err := scrypt.Key(password, salt, s.n, s.r, s.p, length)
 	if err != nil {
@@ -57,10 +63,12 @@ func (s *scryptKSF) Parameterize(parameters ...int) {
 	s.p = parameters[2]
 }
 
+// String returns the KSF name and list of parameters as a string.
 func (s *scryptKSF) String() string {
 	return fmt.Sprintf(scryptFormat, scrypts, s.n, s.r, s.p)
 }
 
+// Params returns the list of internal parameters. If none was provided or modified, the recommended defaults values.
 func (s *scryptKSF) Params() []int {
 	return []int{s.n, s.r, s.p}
 }

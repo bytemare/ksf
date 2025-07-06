@@ -110,6 +110,11 @@ func TestKSF(t *testing.T) {
 			}
 
 			h := m.Get()
+
+			if h.Identifier() != m {
+				t.Fatalf("not equal, %s / %s", h.Identifier(), m)
+			}
+
 			h.Parameterize(h.Params()...)
 			if hasPanic, _ := expectPanic(nil, func() {
 				h2 = m.Harden(password, salt, length)

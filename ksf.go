@@ -39,7 +39,7 @@ func (i Identifier) Available() bool {
 	return i > 0 && i < maxID
 }
 
-// Get returns a KSF with default parameters.
+// Get returns a KSF with default parameters. If the identifier is not recognized, it returns nil.
 func (i Identifier) Get() *KSF {
 	var ksf keyStretchingFunction
 
@@ -68,6 +68,9 @@ func (i Identifier) String() string {
 }
 
 type keyStretchingFunction interface {
+	// Identifier returns the identifier of the key stretching function.
+	Identifier() Identifier
+
 	// Harden uses default parameters for the key derivation function over the input password and salt.
 	Harden(password, salt []byte, length int) []byte
 
