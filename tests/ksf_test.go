@@ -12,6 +12,7 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"slices"
 	"testing"
 
 	"github.com/bytemare/ksf"
@@ -68,15 +69,38 @@ func expectPanic(expectedError error, f func()) (bool, error) {
 	return true, nil
 }
 
-var (
-	ksfs    = []ksf.Identifier{ksf.Argon2id, ksf.PBKDF2Sha512, ksf.Scrypt}
-	strings = []string{"Argon2id(3-65536-4)", "PBKDF2(10000-SHA512)", "Scrypt(32768-8-1)"}
-)
+type ksfProperties struct {
+	string
+	parameters []int
+	saltLength int
+	identifier ksf.Identifier
+}
+
+var ksfs = []ksfProperties{
+	{
+		identifier: ksf.Argon2id,
+		parameters: []int{3, 65536, 4},
+		string:     "Argon2id(3-65536-4)",
+		saltLength: 16,
+	},
+	{
+		identifier: ksf.PBKDF2Sha512,
+		parameters: []int{10000},
+		string:     "PBKDF2(10000-SHA512)",
+		saltLength: 8,
+	},
+	{
+		identifier: ksf.Scrypt,
+		parameters: []int{32768, 8, 1},
+		string:     "Scrypt(32768-8-1)",
+		saltLength: 16,
+	},
+}
 
 func TestAvailability(t *testing.T) {
 	for _, i := range ksfs {
-		if !i.Available() {
-			t.Errorf("%s is not available, but should be", i)
+		if !i.identifier.Available() {
+			t.Errorf("%s is not available, but should be", i.identifier)
 		}
 	}
 
@@ -91,28 +115,41 @@ func TestKSF(t *testing.T) {
 	salt := ksf.Salt(32)
 	length := 32
 
-	for i, m := range ksfs {
-		t.Run(m.String(), func(t *testing.T) {
-			if !m.Available() {
-				t.Fatal("expected assertion to be true")
+	for _, m := range ksfs {
+		t.Run(m.identifier.String(), func(t *testing.T) {
+			if !m.identifier.Available() {
+				t.Fatal("expected KSF to be available, but it is not")
 			}
 
-			if m.String() != strings[i] {
-				t.Fatalf("not equal, %s / %s", m.String(), strings[i])
+			if m.identifier.String() != m.string {
+				t.Fatalf("not equal, %s / %s", m.identifier.String(), m.string)
 			}
 
 			var h1, h2 []byte
 
 			if hasPanic, _ := expectPanic(nil, func() {
-				h1 = m.Harden(password, salt, length)
+				h1 = m.identifier.Harden(password, salt, length)
 			}); hasPanic {
 				t.Fatal("unexpected panic")
 			}
 
-			h := m.Get()
-			h.Parameterize(h.Params()...)
+			h := m.identifier.Get()
+
+			if h.Identifier() != m.identifier {
+				t.Fatalf("not equal, %s / %s", h.Identifier(), m.identifier)
+			}
+
+			if h.RecommendedSaltLength() != m.saltLength {
+				t.Fatalf("not equal, %d / %d", h.RecommendedSaltLength(), m.saltLength)
+			}
+
+			if !slices.Equal(h.Parameters(), m.parameters) {
+				t.Fatalf("not equal, %v / %v", h.Parameters(), m.parameters)
+			}
+
+			h.Parameterize(h.Parameters()...)
 			if hasPanic, _ := expectPanic(nil, func() {
-				h2 = m.Harden(password, salt, length)
+				h2 = h.Harden(password, salt, length)
 			}); hasPanic {
 				t.Fatal("unexpected panic")
 			}

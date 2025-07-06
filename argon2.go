@@ -41,6 +41,17 @@ func argon2idNew() *argon2KSF {
 	}
 }
 
+// Identifier returns the KSF identifier.
+func (a *argon2KSF) Identifier() Identifier {
+	return Argon2id
+}
+
+// RecommendedSaltLength returns the RFC recommended salt length for the Argon2id key stretching function.
+func (a *argon2KSF) RecommendedSaltLength() int {
+	return 16
+}
+
+// Harden uses the Argon2id key stretching function to derive a key from the password and salt.
 func (a *argon2KSF) Harden(password, salt []byte, length int) []byte {
 	return argon2.IDKey(password, salt, a.time, a.memory, a.threads, uint32(length))
 }
@@ -60,10 +71,12 @@ func (a *argon2KSF) Parameterize(parameters ...int) {
 	a.threads = uint8(parameters[2])
 }
 
+// String returns the KSF name and list of parameters as a string.
 func (a *argon2KSF) String() string {
 	return fmt.Sprintf(argon2idFormat, argon2ids, a.time, a.memory, a.threads)
 }
 
-func (a *argon2KSF) Params() []int {
+// Parameters returns the parameters used by the KSF. If none was provided or modified, the recommended defaults value.
+func (a *argon2KSF) Parameters() []int {
 	return []int{int(a.time), int(a.memory), int(a.threads)}
 }
