@@ -71,6 +71,9 @@ type keyStretchingFunction interface {
 	// Identifier returns the identifier of the key stretching function.
 	Identifier() Identifier
 
+	// RecommendedSaltLength returns the recommended salt length for the key stretching function.
+	RecommendedSaltLength() int
+
 	// Harden uses default parameters for the key derivation function over the input password and salt.
 	Harden(password, salt []byte, length int) []byte
 
@@ -80,9 +83,9 @@ type keyStretchingFunction interface {
 	// String returns the string name of the function and its parameters.
 	String() string
 
-	// Params returns the list of internal parameters. If none was provided or modified, the recommended defaults values
-	// are used.
-	Params() []int
+	// Parameters returns the list of internal parameters. If none were provided or modified,
+	// the recommended defaults values are used.
+	Parameters() []int
 }
 
 // KSF allows customisation of the underlying key stretching function.

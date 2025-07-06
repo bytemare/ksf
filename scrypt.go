@@ -42,6 +42,11 @@ func (s *scryptKSF) Identifier() Identifier {
 	return Scrypt
 }
 
+// RecommendedSaltLength returns the RFC recommended salt length for the Scrypt key stretching function.
+func (s *scryptKSF) RecommendedSaltLength() int {
+	return 16
+}
+
 // Harden uses the scrypt key stretching function to derive a key from the password and salt.
 func (s *scryptKSF) Harden(password, salt []byte, length int) []byte {
 	k, err := scrypt.Key(password, salt, s.n, s.r, s.p, length)
@@ -68,7 +73,7 @@ func (s *scryptKSF) String() string {
 	return fmt.Sprintf(scryptFormat, scrypts, s.n, s.r, s.p)
 }
 
-// Params returns the list of internal parameters. If none was provided or modified, the recommended defaults values.
-func (s *scryptKSF) Params() []int {
+// Parameters returns the parameters used by the KSF. If none was provided or modified, the recommended defaults values.
+func (s *scryptKSF) Parameters() []int {
 	return []int{s.n, s.r, s.p}
 }

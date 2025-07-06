@@ -68,15 +68,34 @@ func expectPanic(expectedError error, f func()) (bool, error) {
 	return true, nil
 }
 
-var (
-	ksfs    = []ksf.Identifier{ksf.Argon2id, ksf.PBKDF2Sha512, ksf.Scrypt}
-	strings = []string{"Argon2id(3-65536-4)", "PBKDF2(10000-SHA512)", "Scrypt(32768-8-1)"}
-)
+type ksfProperties struct {
+	string
+	saltLength int
+	Identifier ksf.Identifier
+}
+
+var ksfs = []ksfProperties{
+	{
+		Identifier: ksf.Argon2id,
+		string:     "Argon2id(3-65536-4)",
+		saltLength: 16,
+	},
+	{
+		Identifier: ksf.PBKDF2Sha512,
+		string:     "PBKDF2(10000-SHA512)",
+		saltLength: 8,
+	},
+	{
+		Identifier: ksf.Scrypt,
+		string:     "Scrypt(32768-8-1)",
+		saltLength: 16,
+	},
+}
 
 func TestAvailability(t *testing.T) {
 	for _, i := range ksfs {
-		if !i.Available() {
-			t.Errorf("%s is not available, but should be", i)
+		if !i.Identifier.Available() {
+			t.Errorf("%s is not available, but should be", i.Identifier)
 		}
 	}
 
@@ -91,33 +110,33 @@ func TestKSF(t *testing.T) {
 	salt := ksf.Salt(32)
 	length := 32
 
-	for i, m := range ksfs {
-		t.Run(m.String(), func(t *testing.T) {
-			if !m.Available() {
-				t.Fatal("expected assertion to be true")
+	for _, m := range ksfs {
+		t.Run(m.Identifier.String(), func(t *testing.T) {
+			if !m.Identifier.Available() {
+				t.Fatal("expected KSF to be available, but it is not")
 			}
 
-			if m.String() != strings[i] {
-				t.Fatalf("not equal, %s / %s", m.String(), strings[i])
+			if m.Identifier.String() != m.string {
+				t.Fatalf("not equal, %s / %s", m.Identifier.String(), m.string)
 			}
 
 			var h1, h2 []byte
 
 			if hasPanic, _ := expectPanic(nil, func() {
-				h1 = m.Harden(password, salt, length)
+				h1 = m.Identifier.Harden(password, salt, length)
 			}); hasPanic {
 				t.Fatal("unexpected panic")
 			}
 
-			h := m.Get()
+			h := m.Identifier.Get()
 
-			if h.Identifier() != m {
-				t.Fatalf("not equal, %s / %s", h.Identifier(), m)
+			if h.Identifier() != m.Identifier {
+				t.Fatalf("not equal, %s / %s", h.Identifier(), m.Identifier)
 			}
 
-			h.Parameterize(h.Params()...)
+			h.Parameterize(h.Parameters()...)
 			if hasPanic, _ := expectPanic(nil, func() {
-				h2 = m.Harden(password, salt, length)
+				h2 = h.Harden(password, salt, length)
 			}); hasPanic {
 				t.Fatal("unexpected panic")
 			}
