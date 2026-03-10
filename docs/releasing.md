@@ -1,6 +1,6 @@
 # Releasing
 
-This project publishes Reusable GitHub Workflows and SLSA verification tooling following Semantic Versioning. Releases are coordinated via GitHub pull requests and automated workflows.
+This project publishes the `ksf` Go library following Semantic Versioning. Releases are coordinated via GitHub pull requests and automated GitHub Actions workflows.
 
 ## Release Checklist
 
@@ -24,9 +24,8 @@ This project publishes Reusable GitHub Workflows and SLSA verification tooling f
 
 5. **Let automation publish artifacts**
    - Pushing the tag triggers `.github/workflows/wf-release.yaml`.
-   - The workflow builds a source archive, generates a CycloneDX SBOM, records checksums, and uploads an SBOM attestation.
-   - A reusable SLSA provenance job attaches the provenance bundle to the release.
-   - Monitor the workflow run for success. Confirm that the release contains the tarball, SBOM, and provenance `.intoto.jsonl` assets.
+   - The workflow delegates release packaging and provenance tasks to a pinned reusable SLSA workflow.
+   - Monitor the workflow run for success and confirm the expected release assets and attestations are attached (for example source archive, SBOM, and provenance `.intoto.jsonl` assets).
 
 6. **Publish notes**
    - If the automated release does not include human-readable notes, edit the GitHub release, paste the `CHANGELOG.md` entry, and save.

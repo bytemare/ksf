@@ -9,12 +9,12 @@
 
 This package exposes a simple API to seamlessly use a variety of key stretching functions, also used as key derivation
 functions. It aims at minimum code adaptation in your code, and easy parameterization.
-It completely relies on built-ins, so there's no change in implementations.
+It keeps a thin wrapper over Go's `crypto/rand` and `golang.org/x/crypto` implementations rather than reimplementing primitives.
 
-Supported Key Stretching Functions (or Key Derivation Functions are):
-- Argon2 family
+Supported key stretching functions (KDFs) include:
+- Argon2id
 - Scrypt
-- PBKDF2
+- PBKDF2-SHA512
 
 #### What is ksf?
 
@@ -26,11 +26,11 @@ Supported Key Stretching Functions (or Key Derivation Functions are):
 
 ## Documentation [![Go Reference](https://pkg.go.dev/badge/github.com/bytemare/ksf.svg)](https://pkg.go.dev/github.com/bytemare/ksf)
 
-You can find the documentation and usage examples in [the package doc](https://pkg.go.dev/github.com/bytemare/ksf) and [the project wiki](https://github.com/bytemare/ksf/wiki) .
+You can find the documentation and usage examples in [the package doc](https://pkg.go.dev/github.com/bytemare/ksf).
 
 ## Versioning
 
-[SemVer](http://semver.org) is used for versioning. For the versions available, see the [tags on the repository](https://github.com/bytemare/ksf/tags).
+[SemVer](https://semver.org) is used for versioning. For the versions available, see the [tags on the repository](https://github.com/bytemare/ksf/tags).
 
 
 ## Contributing

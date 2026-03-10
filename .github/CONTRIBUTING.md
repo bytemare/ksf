@@ -10,7 +10,7 @@ Thanks for investing time in improving this module! Pair this workflow guide wit
 
 ## 2. Development Environment
 
-- One of the three latest Go versions (CI runs the current stable toolchain and the two previous releases).
+- A Go version compatible with this module's `go.mod` requirements. CI versions are defined in `.github/workflows/` and delegated reusable workflows.
 - `git`, `make`, and a POSIX-compatible shell.
 - Optional tools used by CI (installed automatically in workflows but helpful locally): `golangci-lint`, `govulncheck`, and other tooling you can install with `make update-linters`.
 

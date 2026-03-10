@@ -21,8 +21,8 @@ import (
 var (
 	errNoPanic         = errors.New("no panic")
 	errNoPanicMessage  = errors.New("panic but no message")
-	errParams          = errors.New("invalid amount of parameters")
-	errArgon2idThreads = errors.New("number of threads cannot be above 255")
+	errPBKDFParams     = errors.New("invalid amount of PBKDF2 parameters: expected 1: iterations")
+	errArgon2idThreads = errors.New("invalid Argon2id parameter value: Argon2id threads must be between 1 and 255")
 )
 
 func hasPanic(f func()) (has bool, err error) {
@@ -69,9 +69,23 @@ func expectPanic(expectedError error, f func()) (bool, error) {
 	return true, nil
 }
 
+func expectError(expectedError error, f func() error) error {
+	err := f()
+
+	if err == nil {
+		return fmt.Errorf("expected error did not occur. Want %q, got %q", expectedError, err)
+	}
+
+	if expectedError != nil && err.Error() != expectedError.Error() {
+		return fmt.Errorf("expected error did not occur. Want %q, got %q", expectedError, err)
+	}
+
+	return nil
+}
+
 type ksfProperties struct {
-	string
-	parameters []int
+	name       string
+	parameters []uint64
 	saltLength int
 	identifier ksf.Identifier
 }
@@ -79,20 +93,20 @@ type ksfProperties struct {
 var ksfs = []ksfProperties{
 	{
 		identifier: ksf.Argon2id,
-		parameters: []int{3, 65536, 4},
-		string:     "Argon2id(3-65536-4)",
+		name:       "Argon2id",
+		parameters: []uint64{3, 65536, 4},
 		saltLength: 16,
 	},
 	{
 		identifier: ksf.PBKDF2Sha512,
-		parameters: []int{10000},
-		string:     "PBKDF2(10000-SHA512)",
+		name:       "PBKDF2-SHA512",
+		parameters: []uint64{10000},
 		saltLength: 8,
 	},
 	{
 		identifier: ksf.Scrypt,
-		parameters: []int{32768, 8, 1},
-		string:     "Scrypt(32768-8-1)",
+		name:       "Scrypt",
+		parameters: []uint64{32768, 8, 1},
 		saltLength: 16,
 	},
 }
@@ -112,7 +126,6 @@ func TestAvailability(t *testing.T) {
 
 func TestKSF(t *testing.T) {
 	password := []byte("password")
-	salt := ksf.Salt(32)
 	length := 32
 
 	for _, m := range ksfs {
@@ -121,37 +134,30 @@ func TestKSF(t *testing.T) {
 				t.Fatal("expected KSF to be available, but it is not")
 			}
 
-			if m.identifier.String() != m.string {
-				t.Fatalf("not equal, %s / %s", m.identifier.String(), m.string)
+			if m.identifier.RecommendedSaltLength() != m.saltLength {
+				t.Fatalf("not equal, %d / %d", m.identifier.RecommendedSaltLength(), m.saltLength)
+			}
+
+			if !slices.Equal(m.identifier.DefaultParameters(), m.parameters) {
+				t.Fatalf("not equal, %v / %v", m.identifier.DefaultParameters(), m.parameters)
+			}
+
+			if m.identifier.String() != m.name {
+				t.Fatalf("not equal, %s / %s", m.identifier.String(), m.name)
 			}
 
 			var h1, h2 []byte
+			salt := m.identifier.RandomSalt(m.identifier.RecommendedSaltLength())
 
-			if hasPanic, _ := expectPanic(nil, func() {
-				h1 = m.identifier.Harden(password, salt, length)
+			h1, err := m.identifier.Harden(password, salt, length)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+
+			if hasPanic, err := expectPanic(nil, func() {
+				h2 = m.identifier.UnsafeHarden(password, salt, length)
 			}); hasPanic {
-				t.Fatal("unexpected panic")
-			}
-
-			h := m.identifier.Get()
-
-			if h.Identifier() != m.identifier {
-				t.Fatalf("not equal, %s / %s", h.Identifier(), m.identifier)
-			}
-
-			if h.RecommendedSaltLength() != m.saltLength {
-				t.Fatalf("not equal, %d / %d", h.RecommendedSaltLength(), m.saltLength)
-			}
-
-			if !slices.Equal(h.Parameters(), m.parameters) {
-				t.Fatalf("not equal, %v / %v", h.Parameters(), m.parameters)
-			}
-
-			h.Parameterize(h.Parameters()...)
-			if hasPanic, _ := expectPanic(nil, func() {
-				h2 = h.Harden(password, salt, length)
-			}); hasPanic {
-				t.Fatal("unexpected panic")
+				t.Fatalf("expected panic did not occur: %v", err)
 			}
 
 			if string(h1) != string(h2) {
@@ -161,57 +167,71 @@ func TestKSF(t *testing.T) {
 	}
 }
 
-func TestCrashScrypt(t *testing.T) {
-	h := ksf.Scrypt.Get()
+func TestErrorScrypt(t *testing.T) {
+	h := ksf.Scrypt
 	password := []byte("password")
-	salt := ksf.Salt(32)
+	salt := h.RandomSalt(32)
 	outputLength := 32
 
 	// Wrong number of parameters
-	if hasPanic, _ := expectPanic(errParams, func() {
-		h.Parameterize(1, 2, 3, 4)
-	}); !hasPanic {
-		t.Fatal("expected panic did not occur")
+	if err := expectError(nil, func() error {
+		return h.VerifyParameters(1, 2, 3, 4)
+	}); err != nil {
+		t.Fatal(err)
 	}
 
 	// n = 1
-	h.Parameterize(1, 8, 1)
-	if hasPanic, _ := expectPanic(nil, func() {
-		_ = h.Harden(password, salt, outputLength)
+	if err := expectError(nil, func() error {
+		return h.VerifyParameters(1, 8, 2)
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	if hasPanic, err := expectPanic(nil, func() {
+		_ = h.UnsafeHarden(password, salt, outputLength, 1, 8, 2)
 	}); !hasPanic {
-		t.Fatal("expected panic did not occur")
+		t.Fatalf("expected panic did not occur: %v", err)
+	}
+
+	// r = 0
+	if err := expectError(nil, func() error {
+		return h.VerifyParameters(32768, 0, 2)
+	}); err != nil {
+		t.Fatal(err)
 	}
 
 	// big r and p
-	h.Parameterize(32768, math.MaxInt32, math.MaxInt32)
-	if hasPanic, _ := expectPanic(nil, func() {
-		_ = h.Harden(password, salt, outputLength)
-	}); !hasPanic {
-		t.Fatal("expected panic did not occur")
+	n, r, p := 32768, math.MaxInt32, math.MaxInt32
+
+	if err := expectError(nil, func() error {
+		_, err := h.Harden(password, salt, outputLength, uint64(n), uint64(r), uint64(p))
+		return err
+	}); err != nil {
+		t.Fatal(err)
 	}
 }
 
-func TestCrashArgon2(t *testing.T) {
+func TestCrashArgon2id(t *testing.T) {
 	// Wrong number of parameters
-	if hasPanic, _ := expectPanic(errParams, func() {
-		ksf.Argon2id.Get().Parameterize(1, 2, 3, 4)
-	}); !hasPanic {
-		t.Fatal("expected panic did not occur")
+	if err := expectError(nil, func() error {
+		return ksf.Argon2id.VerifyParameters(1, 2, 3, 4)
+	}); err != nil {
+		t.Fatal(err)
 	}
 
 	// Too many threads
-	if hasPanic, _ := expectPanic(errArgon2idThreads, func() {
-		ksf.Argon2id.Get().Parameterize(1, 2, 256)
+	if hasPanic, err := expectPanic(errArgon2idThreads, func() {
+		ksf.Argon2id.UnsafeHarden(nil, nil, 0, 1, 2, 256)
 	}); !hasPanic {
-		t.Fatal("expected panic did not occur")
+		t.Fatalf("expected panic did not occur: %v", err)
 	}
 }
 
 func TestCrashPBKDF2(t *testing.T) {
 	// Wrong number of parameters
-	if hasPanic, _ := expectPanic(errParams, func() {
-		ksf.PBKDF2Sha512.Get().Parameterize(1, 2)
+	if hasPanic, err := expectPanic(errPBKDFParams, func() {
+		ksf.PBKDF2Sha512.UnsafeHarden(nil, nil, 0, 1, 2)
 	}); !hasPanic {
-		t.Fatal("expected panic did not occur")
+		t.Fatalf("expected panic did not occur: %v", err)
 	}
 }

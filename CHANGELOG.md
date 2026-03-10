@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For releases prior to this changelog, see [GitHub Releases](https://github.com/bytemare/ksf/releases).
 
-## [Unreleased]
+## v0.4.0 - 06/03/2026
 
 ### Added
 
@@ -15,7 +15,8 @@ For releases prior to this changelog, see [GitHub Releases](https://github.com/b
 
 ### Changed
 
--
+- Updated to Go 1.26
+- Modified API to return error instead of panicking on invalid parameters, for better error handling in consumers.
 
 ### Deprecated
 
