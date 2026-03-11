@@ -15,6 +15,7 @@ import (
 	"github.com/bytemare/ksf"
 )
 
+// ExampleIdentifier_Harden shows how to derive a key with the default Argon2id parameters.
 func ExampleIdentifier_Harden() {
 	salt := []byte("0123456789abcdef")
 	key, err := ksf.Argon2id.Harden([]byte("password"), salt, 32)
@@ -26,6 +27,7 @@ func ExampleIdentifier_Harden() {
 	// Output: 32
 }
 
+// ExampleIdentifier_Harden_customParameters shows how to validate and use custom parameters.
 func ExampleIdentifier_Harden_customParameters() {
 	parameters := []uint64{1}
 	if err := ksf.PBKDF2Sha512.VerifyParameters(parameters...); err != nil {
@@ -41,6 +43,7 @@ func ExampleIdentifier_Harden_customParameters() {
 	// Output: 16
 }
 
+// ExampleErrUnknownIdentifier shows how to detect an unsupported identifier with errors.Is.
 func ExampleErrUnknownIdentifier() {
 	_, err := ksf.Identifier(0).Harden([]byte("password"), []byte("salt"), 16)
 	fmt.Println(errors.Is(err, ksf.ErrUnknownIdentifier))

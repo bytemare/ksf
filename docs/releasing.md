@@ -10,7 +10,7 @@ This project publishes the `ksf` Go library following Semantic Versioning. Relea
 
 2. **Update documentation**
    - Review [CHANGELOG.md](../CHANGELOG.md) and make sure all user-facing changes are captured under `[Unreleased]`.
-   - Move the `[Unreleased]` entries into a new version section dated `YYYY-MM-DD`.
+   - Move the `[Unreleased]` entries into a new version section named `vx.y.z. - DD/MM/YYYY`.
    - Verify README snippets and policy docs still apply.
 
 3. **Run validation locally**

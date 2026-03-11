@@ -7,7 +7,7 @@
 import "github.com/bytemare/ksf"
 ```
 
-`ksf` exposes a simple identifier-based API for password-based key derivation functions. is a thin Go wrapper around `golang.org/x/crypto`, without reimplementing the underlying primitives.
+`ksf` exposes a simple identifier-based API for password-based key derivation functions. It's a thin Go wrapper around `golang.org/x/crypto`, without reimplementing the underlying primitives.
 
 Supported key stretching functions (KDFs) include:
 - Argon2id
