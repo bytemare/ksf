@@ -6,9 +6,11 @@
 // LICENSE file in the root directory of this source tree or at
 // https://spdx.org/licenses/MIT.html
 
+// Package argon2id exposes the Argon2id key stretching implementation used by ksf.
 package argon2id
 
 import (
+	"errors"
 	"fmt"
 	"math"
 
@@ -34,13 +36,17 @@ const (
 
 var (
 	// ErrParams indicates an invalid amount of Argon2id parameters.
-	ErrParams = fmt.Errorf("invalid amount of Argon2id parameters")
+	ErrParams = errors.New("invalid amount of Argon2id parameters")
 
 	// ErrParameterValue indicates that one or more Argon2id parameters have invalid values.
-	ErrParameterValue = fmt.Errorf("invalid Argon2id parameter value")
+	ErrParameterValue = errors.New("invalid Argon2id parameter value")
+
+	// ErrOutputLength indicates that the requested derived key length is invalid.
+	ErrOutputLength = errors.New("invalid Argon2id output length")
 )
 
-// DefaultParameters returns the default Argon2id parameters as a slice of uint64. The parameters are in the following order: time, memory, threads.
+// DefaultParameters returns the default Argon2id parameters as a slice of uint64.
+// The parameters are in the following order: time, memory, threads.
 func DefaultParameters() []uint64 {
 	return []uint64{uint64(DefaultTime), uint64(DefaultMemory), uint64(DefaultThreads)}
 }
@@ -75,9 +81,12 @@ func ValidateParameters(parameters ...uint64) error {
 // The parameters are optional and must be in the following order: time, memory, threads. If no parameters are provided,
 // the recommended default values will be used.
 func Harden(password, salt []byte, length int, parameters ...uint64) ([]byte, error) {
-	err := ValidateParameters(parameters...)
-	if err != nil {
+	if err := ValidateParameters(parameters...); err != nil {
 		return nil, err
+	}
+
+	if length <= 0 {
+		return nil, ErrOutputLength
 	}
 
 	time := DefaultTime

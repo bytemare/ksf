@@ -6,10 +6,12 @@
 // LICENSE file in the root directory of this source tree or at
 // https://spdx.org/licenses/MIT.html
 
-package pbkdf2
+// Package pbkdf2 exposes the PBKDF2-SHA512 key stretching implementation used by ksf.
+package pbkdf2 //nolint:revive // Public algorithm name is part of the package surface.
 
 import (
 	"crypto/sha512"
+	"errors"
 	"fmt"
 	"math"
 
@@ -29,10 +31,13 @@ const (
 
 var (
 	// ErrParams indicates an invalid amount of PBKDF2 parameters.
-	ErrParams = fmt.Errorf("invalid amount of PBKDF2 parameters")
+	ErrParams = errors.New("invalid amount of PBKDF2 parameters")
 
 	// ErrParameterValue indicates that one or more PBKDF2 parameters have invalid values.
-	ErrParameterValue = fmt.Errorf("invalid PBKDF2 parameter value")
+	ErrParameterValue = errors.New("invalid PBKDF2 parameter value")
+
+	// ErrOutputLength indicates that the requested derived key length is invalid.
+	ErrOutputLength = errors.New("invalid PBKDF2 output length")
 )
 
 // DefaultParameters returns the default PBKDF2 iterations parameter as a slice of uint64.
@@ -62,9 +67,12 @@ func ValidateParameters(parameters ...uint64) error {
 // The parameter must be empty or a single value representing the number of iterations.
 // If no parameters are provided, the recommended default values will be used.
 func Harden(password, salt []byte, length int, parameters ...uint64) ([]byte, error) {
-	err := ValidateParameters(parameters...)
-	if err != nil {
+	if err := ValidateParameters(parameters...); err != nil {
 		return nil, err
+	}
+
+	if length <= 0 {
+		return nil, ErrOutputLength
 	}
 
 	iterations := DefaultIterations

@@ -6,9 +6,11 @@
 // LICENSE file in the root directory of this source tree or at
 // https://spdx.org/licenses/MIT.html
 
+// Package scrypt exposes the Scrypt key stretching implementation used by ksf.
 package scrypt
 
 import (
+	"errors"
 	"fmt"
 	"math"
 
@@ -34,13 +36,17 @@ const (
 
 var (
 	// ErrParams indicates an invalid amount of Scrypt parameters.
-	ErrParams = fmt.Errorf("invalid amount of Scrypt parameters")
+	ErrParams = errors.New("invalid amount of Scrypt parameters")
 
 	// ErrParameterValue indicates that one or more Scrypt parameters have invalid values.
-	ErrParameterValue = fmt.Errorf("invalid Scrypt parameter value")
+	ErrParameterValue = errors.New("invalid Scrypt parameter value")
+
+	// ErrOutputLength indicates that the requested derived key length is invalid.
+	ErrOutputLength = errors.New("invalid Scrypt output length")
 )
 
-// DefaultParameters returns the default Scrypt parameters as a slice of uint64. The parameters are in the following order: n, r, and p.
+// DefaultParameters returns the default Scrypt parameters as a slice of uint64.
+// The parameters are in the following order: n, r, and p.
 func DefaultParameters() []uint64 {
 	return []uint64{uint64(DefaultN), uint64(DefaultR), uint64(DefaultP)}
 }
@@ -53,28 +59,58 @@ func ValidateParameters(parameters ...uint64) error {
 	}
 
 	if len(parameters) != 3 {
-		return fmt.Errorf("%w: expected 3: time, memory, and threads", ErrParams)
+		return fmt.Errorf("%w: expected 3: N, r, and p", ErrParams)
 	}
 
 	n := parameters[0]
 	r := parameters[1]
 	p := parameters[2]
 
-	// N must be a power of two greater than 1 and fit into an int.
+	if err := validateN(n); err != nil {
+		return err
+	}
+
+	if err := validateR(r); err != nil {
+		return err
+	}
+
+	if err := validateP(p); err != nil {
+		return err
+	}
+
+	if err := validateCombination(n, r, p); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func validateN(n uint64) error {
 	if n <= 1 || n > math.MaxInt || n&(n-1) != 0 {
 		return fmt.Errorf("%w: scrypt N must be a power of 2 between 2 and %d", ErrParameterValue, math.MaxInt)
 	}
 
-	//  r and p must be greater than zero and fit into an int.
+	return nil
+}
+
+func validateR(r uint64) error {
 	if r == 0 || r > math.MaxInt {
-		return fmt.Errorf("%w: scrypt memory must be between 1 and %d", ErrParameterValue, math.MaxInt/256)
+		return fmt.Errorf("%w: Scrypt r must be between 1 and %d", ErrParameterValue, math.MaxInt)
 	}
 
+	return nil
+}
+
+func validateP(p uint64) error {
 	if p == 0 || p > math.MaxInt {
-		return fmt.Errorf("%w: scrypt threads must be between 1 and 255", ErrParameterValue)
+		return fmt.Errorf("%w: Scrypt p must be between 1 and %d", ErrParameterValue, math.MaxInt)
 	}
 
-	// reusing the same check as the scrypt library to prevent integer overflow in later allocations and size calculations.
+	return nil
+}
+
+func validateCombination(n, r, p uint64) error {
+	// Reuse the same overflow guards as x/crypto/scrypt before later allocations.
 	if r*p >= 1<<30 || r > math.MaxInt/128/p || r > math.MaxInt/256 || n > math.MaxInt/128/r {
 		return fmt.Errorf("%w: parameter combination result is too large", ErrParameterValue)
 	}
@@ -86,9 +122,12 @@ func ValidateParameters(parameters ...uint64) error {
 // The parameters are optional and must be in the following order: n, r, and p. If no parameters are provided,
 // the recommended default values will be used.
 func Harden(password, salt []byte, length int, parameters ...uint64) ([]byte, error) {
-	err := ValidateParameters(parameters...)
-	if err != nil {
+	if err := ValidateParameters(parameters...); err != nil {
 		return nil, err
+	}
+
+	if length <= 0 {
+		return nil, ErrOutputLength
 	}
 
 	n := DefaultN
@@ -101,6 +140,7 @@ func Harden(password, salt []byte, length int, parameters ...uint64) ([]byte, er
 		p = int(parameters[2])
 	}
 
+	//nolint:wrapcheck // ValidateParameters already mirrors x/crypto/scrypt's input errors.
 	return scrypt.Key(password, salt, n, r, p, length)
 }
 

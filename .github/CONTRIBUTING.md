@@ -1,12 +1,12 @@
 # Contributing
 
-Thanks for investing time in improving this module! Pair this workflow guide with the technical guidance in [docs/architecture_and_guidelines.md](../docs/architecture_and_guidelines.md) and the security rationale in [docs/security_model.md](../docs/security_model.md).
+Thanks for investing time in improving `ksf`.
 
 ## 1. Before You Start
 
 - Review the [Code of Conduct](CODE_OF_CONDUCT.md). Participating implies acceptance of its terms.
 - Search existing [issues](https://github.com/bytemare/ksf/issues) and pull requests to avoid duplicating work. For substantial or breaking changes, open an issue first so we can agree on scope.
-- Familiarize yourself with the architecture and testing expectations in the documents linked above.
+- Read the public API overview in [README.md](../README.md), the release notes in [CHANGELOG.md](../CHANGELOG.md), and the release workflow in [docs/releasing.md](../docs/releasing.md).
 
 ## 2. Development Environment
 
@@ -16,7 +16,7 @@ Thanks for investing time in improving this module! Pair this workflow guide wit
 
 ## 3. Workflow and Branching
 
-1. Fork the repository and create topic branches from `main` (for example `feat/curve25519-support`, `docs/security-refresh`).
+1. Fork the repository and create topic branches from `main` (for example `feat/api-hardening`, `docs/release-notes-refresh`).
 2. Keep changes focused. Separate refactors, dependency bumps, and feature work into distinct pull requests.
 3. Reference related issues in your branch description or pull request.
 
@@ -31,12 +31,17 @@ Thanks for investing time in improving this module! Pair this workflow guide wit
 
 1. Run the paved commands before pushing:
   ```bash
-  make -C .github lint vulncheck test cover fuzz
+  make -C .github fmt
+  FUZZTIME=1s make -C .github check
   ```
-  These targets mirror the CI tests (golangci-lint, `go test`, fuzzing, `govulncheck`, etc.).
-2. Ensure `go mod tidy` produces no diff and that coverage does not regress meaningfully. If coverage drops, explain why in the pull request.
-3. Update documentation when behaviour or APIs change. Architecture or security changes should be reflected in the relevant `docs/` files.
-4. **For user-facing changes**, add an entry to [CHANGELOG.md](../CHANGELOG.md) under `[Unreleased]` describing what changed.
+  `fmt` is the mutating formatting step. `check` is the read-only validation suite (`lint`, `vulncheck`, `test`, `cover`, and fuzz smoke tests).
+2. If you touch fuzz-sensitive code paths, run a longer fuzz pass locally:
+  ```bash
+  FUZZTIME=10s make -C .github fuzz
+  ```
+3. Ensure `go mod tidy` produces no diff and that coverage does not regress meaningfully. If coverage drops, explain why in the pull request.
+4. Update documentation when behavior or APIs change. At minimum, keep [README.md](../README.md), [CHANGELOG.md](../CHANGELOG.md), and any affected files in `docs/` aligned with the code.
+5. **For user-facing changes**, add an entry to [CHANGELOG.md](../CHANGELOG.md) under `[Unreleased]`.
 
 ## 6. Opening a Pull Request
 
@@ -64,9 +69,9 @@ Thanks for investing time in improving this module! Pair this workflow guide wit
 
 ## 10. Further Reading
 
-- Security model and assurance case: [docs/security_model.md](../docs/security_model.md)
-- Architecture and engineering guidelines: [docs/architecture_and_guidelines.md](../docs/architecture_and_guidelines.md)
+- Security policy: [SECURITY.md](SECURITY.md)
 - Governance model: [docs/governance.md](../docs/governance.md)
-- Roadmap and open initiatives: [docs/roadmap.md](../docs/roadmap.md)
+- Release process: [docs/releasing.md](../docs/releasing.md)
+- Project roadmap and open initiatives: [docs/roadmap.md](../docs/roadmap.md)
 
 Thank you for helping keep `ksf` reliable and secure!

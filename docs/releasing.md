@@ -9,13 +9,19 @@ This project publishes the `ksf` Go library following Semantic Versioning. Relea
    - Open or update an issue/PR describing notable changes.
 
 2. **Update documentation**
-   - Add release notes to [CHANGELOG.md](../CHANGELOG.md) under a new version heading.
-   - Move entries from `[Unreleased]` to the new version section.
+   - Review [CHANGELOG.md](../CHANGELOG.md) and make sure all user-facing changes are captured under `[Unreleased]`.
+   - Move the `[Unreleased]` entries into a new version section dated `YYYY-MM-DD`.
    - Verify README snippets and policy docs still apply.
 
 3. **Run validation locally**
 
-   Run the validation suite as described in [CONTRIBUTING.md §5](../.github/CONTRIBUTING.md#5-quality-checks).
+   Run the validation suite as described in [CONTRIBUTING.md §5](../.github/CONTRIBUTING.md#5-quality-checks):
+
+   ```bash
+   make -C .github fmt
+   FUZZTIME=1s make -C .github check
+   FUZZTIME=10s make -C .github fuzz
+   ```
 
 4. **Tag and publish a new release**
    ```bash

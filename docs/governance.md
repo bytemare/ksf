@@ -6,13 +6,13 @@ This document explains how the `github.com/bytemare/ksf` project is stewarded, h
 
 - **Maintainer** – Owns the technical direction, reviews and merges pull requests, and cuts releases. The canonical maintainer is Daniel Bourdrez ([@bytemare](https://github.com/bytemare)), as recorded in `LICENSE` and `.github/CODEOWNERS`.
 - **Contributor** – Anyone submitting issues, documentation, or code changes through the standard contribution process.
-- **Reviewer** – Maintainers may delegate review responsibilities to trusted contributors for specific areas (e.g., curve backends, tooling).
+- **Reviewer** – Maintainers may delegate review responsibilities to trusted contributors for specific areas (for example API surface changes, test harness updates, or CI/release tooling).
 
 ## Decision-Making
 
 - The maintainer seeks consensus on issues and pull requests. Discussion happens in GitHub Issues/PRs so decisions remain transparent.
 - When consensus cannot be reached in a reasonable time, the maintainer makes the final call with a written rationale referencing project goals (correctness, safety, long-term maintainability).
-- Breaking API changes require an open discussion outlining impact, migration paths, and a SemVer plan before implementation proceeds.
+- Breaking API changes require an open discussion outlining impact, migration paths, changelog updates, and a SemVer plan before implementation proceeds.
 
 ## Becoming a Maintainer
 
