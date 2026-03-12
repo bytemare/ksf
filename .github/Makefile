@@ -33,8 +33,12 @@ license:
 .PHONY: lint
 lint: license
 	@echo "Linting ..."
-	@if golangci-lint config verify -v --config=.golangci.yml; then echo "Config OK"; else exit 1; fi;
 	@if golangci-lint run --config=.golangci.yml ../...; then echo "Linting OK"; else exit 1; fi;
+
+.PHONY: lint-config
+lint-config:
+	@echo "Verifying golangci-lint configuration ..."
+	@if golangci-lint config verify -v --config=.golangci.yml; then echo "Config OK"; else exit 1; fi;
 
 .PHONY: check
 check:

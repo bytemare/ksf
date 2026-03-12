@@ -18,10 +18,13 @@ This project publishes the `ksf` Go library following Semantic Versioning. Relea
    Run the validation suite as described in [CONTRIBUTING.md §5](../.github/CONTRIBUTING.md#5-quality-checks):
 
    ```bash
-   make -C .github fmt
+   make -C .github lint
    FUZZTIME=1s make -C .github check
+   make -C .github lint-config
    FUZZTIME=10s make -C .github fuzz
    ```
+
+   `lint-config` validates the GolangCI-Lint configuration schema and may require network access.
 
 4. **Tag and publish a new release**
    ```bash

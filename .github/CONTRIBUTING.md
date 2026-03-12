@@ -30,18 +30,26 @@ Thanks for investing time in improving `ksf`.
 ## 5. Quality Checks
 
 1. Run the paved commands before pushing:
-  ```bash
-  make -C .github fmt
-  FUZZTIME=1s make -C .github check
-  ```
-  `fmt` is the mutating formatting step. `check` is the read-only validation suite (`lint`, `vulncheck`, `test`, `cover`, and fuzz smoke tests).
-2. If you touch fuzz-sensitive code paths, run a longer fuzz pass locally:
-  ```bash
-  FUZZTIME=10s make -C .github fuzz
-  ```
-3. Ensure `go mod tidy` produces no diff and that coverage does not regress meaningfully. If coverage drops, explain why in the pull request.
-4. Update documentation when behavior or APIs change. At minimum, keep [README.md](../README.md), [CHANGELOG.md](../CHANGELOG.md), and any affected files in `docs/` aligned with the code.
-5. **For user-facing changes**, add an entry to [CHANGELOG.md](../CHANGELOG.md) under `[Unreleased]`.
+    ```bash
+    make -C .github fmt
+    make -C .github check
+    ```
+    `fmt` is the mutating formatting step. `check` is the read-only validation suite (`lint`, `vulncheck`, `test`, `cover`, and fuzz smoke tests).
+
+2. If you change [.github/.golangci.yml](.golangci.yml), also run:
+    ```bash
+    make -C .github lint-config
+    ```
+    `lint-config` verifies the GolangCI-Lint schema and may require network access.
+
+3. If you touch fuzz-sensitive code paths, run a longer fuzz pass locally:
+    ```bash
+    FUZZTIME=10s make -C .github fuzz
+    ```
+
+4. Ensure `go mod tidy` produces no diff and that coverage does not regress meaningfully. If coverage drops, explain why in the pull request.
+5. Update documentation when behavior or APIs change. At minimum, keep [README.md](../README.md), [CHANGELOG.md](../CHANGELOG.md), and any affected files in `docs/` aligned with the code.
+6. **For user-facing changes**, add an entry to [CHANGELOG.md](../CHANGELOG.md) under `[Unreleased]`.
 
 ## 6. Opening a Pull Request
 

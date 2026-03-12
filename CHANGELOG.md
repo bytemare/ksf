@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For releases prior to this changelog, see [GitHub Releases](https://github.com/bytemare/ksf/releases).
 
-## v0.5.0 - 11/03/2026
+## [0.5.0] - 2026-03-12
 
 ### Added
 - Exported `ErrUnknownIdentifier` so callers can use `errors.Is` when an unsupported identifier is requested.
@@ -40,5 +40,4 @@ For releases prior to this changelog, see [GitHub Releases](https://github.com/b
 - Replace `Salt()` with `RandomSalt(length)` on the identifier you want to use.
 - Audit any previous panic-based invalid-input handling. `Harden` and `VerifyParameters` now report failures as errors, while `UnsafeHarden` keeps panic semantics.
 
-[Unreleased]: https://github.com/bytemare/ksf/compare/v0.4.0...HEAD
-[0.4.0]: https://github.com/bytemare/ksf/releases/tag/v0.4.0
+[0.5.0]: https://github.com/bytemare/ksf/releases/tag/v0.5.0
