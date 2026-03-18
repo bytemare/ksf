@@ -1,0 +1,156 @@
+// SPDX-License-Identifier: MIT
+//
+// Copyright (C) 2020-2025 Daniel Bourdrez. All Rights Reserved.
+//
+// This source code is licensed under the MIT license found in the
+// LICENSE file in the root directory of this source tree or at
+// https://spdx.org/licenses/MIT.html
+
+// Package scrypt exposes the Scrypt key stretching implementation used by ksf.
+package scrypt
+
+import (
+	"errors"
+	"fmt"
+	"math"
+
+	"golang.org/x/crypto/scrypt"
+)
+
+const (
+	// Name is the string identifier for the Scrypt key stretching function.
+	Name = "Scrypt"
+
+	// RecommendedSaltLength is the RFC recommended salt length for the Scrypt key stretching function.
+	RecommendedSaltLength = 16
+
+	// DefaultN is the default N parameter for the Scrypt key stretching function.
+	DefaultN = 32768
+
+	// DefaultR is the default r parameter for the Scrypt key stretching function.
+	DefaultR = 8
+
+	// DefaultP is the default p parameter for the Scrypt key stretching function.
+	DefaultP = 1
+)
+
+var (
+	// ErrParams indicates an invalid amount of Scrypt parameters.
+	ErrParams = errors.New("invalid amount of Scrypt parameters")
+
+	// ErrParameterValue indicates that one or more Scrypt parameters have invalid values.
+	ErrParameterValue = errors.New("invalid Scrypt parameter value")
+
+	// ErrOutputLength indicates that the requested derived key length is invalid.
+	ErrOutputLength = errors.New("invalid Scrypt output length")
+)
+
+// DefaultParameters returns the default Scrypt parameters as a slice of uint64.
+// The parameters are in the following order: n, r, and p.
+func DefaultParameters() []uint64 {
+	return []uint64{uint64(DefaultN), uint64(DefaultR), uint64(DefaultP)}
+}
+
+// ValidateParameters checks if the provided parameters are valid for the Scrypt key stretching function.
+// The parameters must be in the following order: n, r, and p.
+func ValidateParameters(parameters ...uint64) error {
+	if len(parameters) == 0 {
+		return nil
+	}
+
+	if len(parameters) != 3 {
+		return fmt.Errorf("%w: expected 3: N, r, and p", ErrParams)
+	}
+
+	n := parameters[0]
+	r := parameters[1]
+	p := parameters[2]
+
+	if err := validateN(n); err != nil {
+		return err
+	}
+
+	if err := validateR(r); err != nil {
+		return err
+	}
+
+	if err := validateP(p); err != nil {
+		return err
+	}
+
+	if err := validateCombination(n, r, p); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func validateN(n uint64) error {
+	if n <= 1 || n > math.MaxInt || n&(n-1) != 0 {
+		return fmt.Errorf("%w: scrypt N must be a power of 2 between 2 and %d", ErrParameterValue, math.MaxInt)
+	}
+
+	return nil
+}
+
+func validateR(r uint64) error {
+	if r == 0 || r > math.MaxInt {
+		return fmt.Errorf("%w: Scrypt r must be between 1 and %d", ErrParameterValue, math.MaxInt)
+	}
+
+	return nil
+}
+
+func validateP(p uint64) error {
+	if p == 0 || p > math.MaxInt {
+		return fmt.Errorf("%w: Scrypt p must be between 1 and %d", ErrParameterValue, math.MaxInt)
+	}
+
+	return nil
+}
+
+func validateCombination(n, r, p uint64) error {
+	// Reuse the same overflow guards as x/crypto/scrypt before later allocations.
+	if r*p >= 1<<30 || r > math.MaxInt/128/p || r > math.MaxInt/256 || n > math.MaxInt/128/r {
+		return fmt.Errorf("%w: parameter combination result is too large", ErrParameterValue)
+	}
+
+	return nil
+}
+
+// Harden uses the Scrypt key stretching function to derive a key from the password and salt.
+// The parameters are optional and must be in the following order: n, r, and p. If no parameters are provided,
+// the recommended default values will be used.
+func Harden(password, salt []byte, length int, parameters ...uint64) ([]byte, error) {
+	if err := ValidateParameters(parameters...); err != nil {
+		return nil, err
+	}
+
+	if length <= 0 {
+		return nil, ErrOutputLength
+	}
+
+	n := DefaultN
+	r := DefaultR
+	p := DefaultP
+
+	if len(parameters) != 0 {
+		n = int(parameters[0])
+		r = int(parameters[1])
+		p = int(parameters[2])
+	}
+
+	//nolint:wrapcheck // ValidateParameters already mirrors x/crypto/scrypt's input errors.
+	return scrypt.Key(password, salt, n, r, p, length)
+}
+
+// UnsafeHarden is the same as Harden but panics on invalid parameters. It is safe to use if parameters have
+// previously been validated by ValidateParameters.
+func UnsafeHarden(password, salt []byte, length int, parameters ...uint64) []byte {
+	out, err := Harden(password, salt, length, parameters...)
+	if err != nil {
+		panic(err)
+	}
+
+	return out
+}

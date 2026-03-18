@@ -1,0 +1,12 @@
+cff-version: 1.2.0
+title: ksf
+message: If you use this software, please cite it using the metadata from this file.
+type: software
+abstract:
+repository-code: https://github.com/bytemare/ksf
+license: MIT
+keywords:
+  -
+authors:
+  - family-names: Bourdrez
+    given-names: Daniel
