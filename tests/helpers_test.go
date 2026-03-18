@@ -245,7 +245,7 @@ func mustAlgorithmCase(identifier ksf.Identifier) algorithmCase {
 }
 
 func panicValue(f func()) (any, bool) {
-	var report interface{}
+	var report any
 
 	func() {
 		defer func() {

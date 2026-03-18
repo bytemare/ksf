@@ -14,7 +14,7 @@ Supported key stretching functions (KDFs) include:
 - Scrypt
 - PBKDF2-SHA512
 
-#### What is ksf?
+## What is ksf?
 
 > In cryptography, key stretching techniques are used to make a possibly weak key, typically a password or passphrase,
 > more secure against a brute-force attack by increasing the resources (time and possibly space) it takes to test each
