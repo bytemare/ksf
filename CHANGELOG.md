@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For releases prior to this changelog, see [GitHub Releases](https://github.com/bytemare/ksf/releases).
 
-## [0.5.0] - 2026-03-12
+## [0.5.0] - 2026-03-18
 
 ### Added
 - Exported `ErrUnknownIdentifier` so callers can use `errors.Is` when an unsupported identifier is requested.
