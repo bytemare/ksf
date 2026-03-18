@@ -35,7 +35,7 @@ salt := h.RandomSalt(0) // 0 falls back to the recommended salt length for the c
 
 key, err := h.Harden([]byte("password"), salt, 32)
 if err != nil {
-	panic(err)
+    panic(err)
 }
 ```
 
@@ -46,12 +46,12 @@ h := ksf.PBKDF2Sha512
 parameters := []uint64{10001} // 10001 iterations, which is above the default of 10000
 
 if err := h.VerifyParameters(parameters...); err != nil {
-	panic(err)
+    panic(err)
 }
 
 key, err := h.Harden([]byte("password"), []byte("01234567"), 16, parameters...)
 if err != nil {
-	panic(err)
+    panic(err)
 }
 ```
 
@@ -62,7 +62,7 @@ id := ksf.Identifier(0)
 
 _, err := id.Harden([]byte("password"), []byte("salt"), 16)
 if errors.Is(err, ksf.ErrUnknownIdentifier) {
-	// handle unsupported or unregistered identifier
+    // handle unsupported or unregistered identifier
 }
 ```
 
