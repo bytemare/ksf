@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For releases prior to this changelog, see [GitHub Releases](https://github.com/bytemare/ksf/releases).
 
+## [Unreleased]
+
+### Fixed
+- `argon2id` builds on 32-bit platforms (`GOARCH=386`, `GOARCH=arm`, TinyGo's `wasm`): the bounds `ValidateParameters` puts in its errors no longer overflow `int` ([#44](https://github.com/bytemare/ksf/issues/44), [#45](https://github.com/bytemare/ksf/issues/45)).
+
 ## [0.5.0] - 2026-03-18
 
 ### Added
@@ -40,4 +45,5 @@ For releases prior to this changelog, see [GitHub Releases](https://github.com/b
 - Replace `Salt()` with `RandomSalt(length)` on the identifier you want to use.
 - Audit any previous panic-based invalid-input handling. `Harden` and `VerifyParameters` now report failures as errors, while `UnsafeHarden` keeps panic semantics.
 
+[Unreleased]: https://github.com/bytemare/ksf/compare/v0.5.0...HEAD
 [0.5.0]: https://github.com/bytemare/ksf/releases/tag/v0.5.0

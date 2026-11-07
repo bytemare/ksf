@@ -63,11 +63,11 @@ func ValidateParameters(parameters ...uint64) error {
 	}
 
 	if parameters[0] <= 0 || parameters[0] > math.MaxUint32 {
-		return fmt.Errorf("%w: Argon2id time must be between 1 and %d", ErrParameterValue, math.MaxUint32)
+		return fmt.Errorf("%w: Argon2id time must be between 1 and %d", ErrParameterValue, uint64(math.MaxUint32))
 	}
 
 	if parameters[1] <= 0 || parameters[1] > math.MaxUint32 {
-		return fmt.Errorf("%w: Argon2id memory must be between 1 and %d", ErrParameterValue, math.MaxUint32)
+		return fmt.Errorf("%w: Argon2id memory must be between 1 and %d", ErrParameterValue, uint64(math.MaxUint32))
 	}
 
 	if parameters[2] <= 0 || parameters[2] > 255 {
